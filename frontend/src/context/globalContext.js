@@ -1,91 +1,97 @@
-import React, { useContext, useState } from "react"
-import axios from 'axios'
-
+import React, { useContext, useState } from "react";
+import axios from 'axios';
 
 const BASE_URL = "http://localhost:5000/api/v1/";
 
+const GlobalContext = React.createContext();
 
-const GlobalContext = React.createContext()
+export const GlobalProvider = ({ children }) => {
 
-export const GlobalProvider = ({children}) => {
+    const [incomes, setIncomes] = useState([]);
+    const [expenses, setExpenses] = useState([]);
+    const [error, setError] = useState(null);
 
-    const [incomes, setIncomes] = useState([])
-    const [expenses, setExpenses] = useState([])
-    const [error, setError] = useState(null)
-
-    //calculate incomes
+    // Add Income
     const addIncome = async (income) => {
-        const response = await axios.post(`${BASE_URL}add-income`, income)
-            .catch((err) =>{
-                setError(err.response.data.message)
-            })
-        getIncomes()
-    }
+        try {
+            await axios.post(`${BASE_URL}add-income`, income);
+            getIncomes();
+        } catch (err) {
+            setError(err.response?.data?.message || "An error occurred");
+        }
+    };
 
+    // Get Incomes
     const getIncomes = async () => {
-        const response = await axios.get(`${BASE_URL}get-incomes`)
-        setIncomes(response.data)
-        console.log(response.data)
-    }
+        try {
+            const response = await axios.get(`${BASE_URL}get-incomes`);
+            setIncomes(response.data);
+        } catch (err) {
+            setError(err.response?.data?.message || "An error occurred");
+        }
+    };
 
+    // Delete Income
     const deleteIncome = async (id) => {
-        const res  = await axios.delete(`${BASE_URL}delete-income/${id}`)
-        getIncomes()
-    }
+        try {
+            await axios.delete(`${BASE_URL}delete-income/${id}`);
+            getIncomes();
+        } catch (err) {
+            setError(err.response?.data?.message || "An error occurred");
+        }
+    };
 
+    // Calculate Total Income
     const totalIncome = () => {
-        let totalIncome = 0;
-        incomes.forEach((income) =>{
-            totalIncome = totalIncome + income.amount
-        })
+        return incomes.reduce((total, income) => total + income.amount, 0);
+    };
 
-        return totalIncome;
-    }
+    // Add Expense
+    const addExpense = async (expense) => {
+        try {
+            await axios.post(`${BASE_URL}add-expense`, expense);
+            getExpenses();
+        } catch (err) {
+            setError(err.response.data.message);
+        }
+    };
 
-
-    //calculate incomes
-    const addExpense = async (income) => {
-        const response = await axios.post(`${BASE_URL}add-expense`, income)
-            .catch((err) =>{
-                setError(err.response.data.message)
-            })
-        getExpenses()
-    }
-
+    // Get Expenses
     const getExpenses = async () => {
-        const response = await axios.get(`${BASE_URL}get-expenses`)
-        setExpenses(response.data)
-        console.log(response.data)
-    }
+        try {
+            const response = await axios.get(`${BASE_URL}get-expenses`);
+            setExpenses(response.data);
+        } catch (err) {
+            setError(err.response?.data?.message || "An error occurred");
+        }
+    };
 
+    // Delete Expense
     const deleteExpense = async (id) => {
-        const res  = await axios.delete(`${BASE_URL}delete-expense/${id}`)
-        getExpenses()
-    }
+        try {
+            await axios.delete(`${BASE_URL}delete-expense/${id}`);
+            getExpenses();
+        } catch (err) {
+            setError(err.response?.data?.message || "An error occurred");
+        }
+    };
 
+    // Calculate Total Expenses
     const totalExpenses = () => {
-        let totalIncome = 0;
-        expenses.forEach((income) =>{
-            totalIncome = totalIncome + income.amount
-        })
+        return expenses.reduce((total, expense) => total + expense.amount, 0);
+    };
 
-        return totalIncome;
-    }
-
-
+    // Calculate Total Balance
     const totalBalance = () => {
-        return totalIncome() - totalExpenses()
-    }
+        return totalIncome() - totalExpenses();
+    };
 
+    // Transaction History
     const transactionHistory = () => {
-        const history = [...incomes, ...expenses]
-        history.sort((a, b) => {
-            return new Date(b.createdAt) - new Date(a.createdAt)
-        })
-
-        return history.slice(0, 3)
-    }
-
+        const history = [...incomes, ...expenses];
+        history.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        return history.slice(0, 3);
+    };
 
     return (
         <GlobalContext.Provider value={{
@@ -106,9 +112,9 @@ export const GlobalProvider = ({children}) => {
         }}>
             {children}
         </GlobalContext.Provider>
-    )
-}
+    );
+};
 
-export const useGlobalContext = () =>{
-    return useContext(GlobalContext)
-}
+export const useGlobalContext = () => {
+    return useContext(GlobalContext);
+};

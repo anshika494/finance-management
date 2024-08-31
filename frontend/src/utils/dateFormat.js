@@ -1,6 +1,10 @@
-import moment from 'moment'
+import moment from 'moment';
 
-
-export const dateFormat = (date) =>{
-    return moment(date).format('DD/MM/YYYY')
+// Format date with a default or custom format
+export const dateFormat = (date, format = 'DD/MM/YYYY') => {
+    // Validate if the date is valid
+    if (!moment(date).isValid()) {
+        return 'Invalid date';
+    }
+    return moment(date).format(format);
 }

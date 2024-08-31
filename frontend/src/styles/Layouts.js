@@ -5,9 +5,23 @@ export const MainLayout = styled.div`
     height: 100%;
     display: flex;
     gap: 2rem;
+    align-items: center; /* Centers items vertically */
+    justify-content: center; /* Centers items horizontally */
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        flex-direction: column;
+        padding: 1rem;
+    }
 `;
 
 export const InnerLayout = styled.div`
     padding: 2rem 1.5rem;
     width: 100%;
+    box-sizing: border-box; /* Ensures padding is included in width */
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        padding: 1rem;
+    }
 `;

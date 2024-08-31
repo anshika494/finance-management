@@ -1,17 +1,28 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { useGlobalContext } from '../../context/globalContext';
 import { InnerLayout } from '../../styles/Layouts';
-import Form from '../Form/Form';
-import IncomeItem from '../IncomeItem/IncomeItem';
 import ExpenseForm from './ExpenseForm';
+import IncomeItem from '../IncomeItem/IncomeItem';
 
 function Expenses() {
-    const {addIncome,expenses, getExpenses, deleteExpense, totalExpenses} = useGlobalContext()
+    const {expenses, getExpenses, deleteExpense, totalExpenses} = useGlobalContext();
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
 
-    useEffect(() =>{
-        getExpenses()
-    }, [])
+    useEffect(() => {
+        const fetchExpenses = async () => {
+            try {
+                await getExpenses();
+            } catch (err) {
+                setError('Failed to load expenses');
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchExpenses();
+    }, [getExpenses]);
+
     return (
         <ExpenseStyled>
             <InnerLayout>
@@ -22,9 +33,11 @@ function Expenses() {
                         <ExpenseForm />
                     </div>
                     <div className="incomes">
-                        {expenses.map((income) => {
-                            const {_id, title, amount, date, category, description, type} = income;
-                            console.log(income)
+                        {loading && <p>Loading expenses...</p>}
+                        {error && <p>{error}</p>}
+                        {expenses.length === 0 && !loading && !error && <p>No expenses to display</p>}
+                        {expenses.map((expense) => {
+                            const {_id, title, amount, date, category, description, type} = expense;
                             return <IncomeItem
                                 key={_id}
                                 id={_id} 
@@ -48,7 +61,7 @@ function Expenses() {
 const ExpenseStyled = styled.div`
     display: flex;
     overflow: auto;
-    .total-income{
+    .total-income {
         display: flex;
         justify-content: center;
         align-items: center;
@@ -60,19 +73,19 @@ const ExpenseStyled = styled.div`
         margin: 1rem 0;
         font-size: 2rem;
         gap: .5rem;
-        span{
+        span {
             font-size: 2.5rem;
             font-weight: 800;
             color: var(--color-green);
         }
     }
-    .income-content{
+    .income-content {
         display: flex;
         gap: 2rem;
-        .incomes{
+        .incomes {
             flex: 1;
         }
     }
 `;
 
-export default Expenses
+export default Expenses;
